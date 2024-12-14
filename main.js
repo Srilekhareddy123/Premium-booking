@@ -176,3 +176,188 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
     });
 });
+
+// Video Modal Implementation
+function initializeVideoModal() {
+    const demoButton = document.querySelector('a[href="#demo"]');
+    const modalHTML = `
+        <div class="modal fade" id="videoModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <div class="ratio ratio-16x9">
+                            <iframe src="about:blank" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+
+    demoButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        videoModal.show();
+        document.querySelector('#videoModal iframe').src = 'YOUR_VIDEO_URL';
+    });
+
+    document.getElementById('videoModal').addEventListener('hidden.bs.modal', () => {
+        document.querySelector('#videoModal iframe').src = 'about:blank';
+    });
+}
+
+// Enhanced Scroll Effects
+function initializeScrollEffects() {
+    const sections = document.querySelectorAll('section');
+    
+    const observerOptions = {
+        threshold: 0.2,
+        rootMargin: '0px'
+    };
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('section-visible');
+                initializeSectionAnimations(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => {
+        sectionObserver.observe(section);
+    });
+}
+
+function initializeSectionAnimations(section) {
+    const elements = section.querySelectorAll('.animate-on-scroll');
+    elements.forEach((el, index) => {
+        setTimeout(() => {
+            el.classList.add('animate');
+        }, index * 200);
+    });
+}
+
+// Feature Card Hover Effects
+function initializeFeatureCards() {
+    const cards = document.querySelectorAll('.feature-card');
+    
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+        });
+    });
+}
+
+// Pricing Toggle
+function initializePricingToggle() {
+    const toggleButton = document.querySelector('.pricing-toggle');
+    const monthlyPrices = document.querySelectorAll('.price-monthly');
+    const yearlyPrices = document.querySelectorAll('.price-yearly');
+
+    if (toggleButton) {
+        toggleButton.addEventListener('change', () => {
+            monthlyPrices.forEach(price => price.classList.toggle('active'));
+            yearlyPrices.forEach(price => price.classList.toggle('active'));
+        });
+    }
+}
+
+// Contact Form Validation
+function initializeContactForm() {
+    const form = document.querySelector('#contactForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const submitButton = form.querySelector('button[type="submit"]');
+        
+        try {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending...';
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            showToast('Message sent successfully!', 'success');
+            form.reset();
+        } catch (error) {
+            showToast('Failed to send message. Please try again.', 'error');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Send Message';
+        }
+    });
+}
+
+// Custom Toast Notifications
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type} show`;
+    toast.innerHTML = `
+        <div class="toast-header">
+            <i class="bi ${getToastIcon(type)} me-2"></i>
+            <strong class="me-auto">${capitalizeFirstLetter(type)}</strong>
+            <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+        <div class="toast-body">${message}</div>
+    `;
+    
+    const toastContainer = document.querySelector('.toast-container') || createToastContainer();
+    toastContainer.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+function getToastIcon(type) {
+    const icons = {
+        success: 'bi-check-circle-fill',
+        error: 'bi-exclamation-circle-fill',
+        info: 'bi-info-circle-fill',
+        warning: 'bi-exclamation-triangle-fill'
+    };
+    return icons[type] || icons.info;
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    document.body.appendChild(container);
+    return container;
+}
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeParticles();
+    initializeAOS();
+    initializeNavbar();
+    initializeTestimonials();
+    initializeCounters();
+    initializeVideoModal();
+    initializeScrollEffects();
+    initializeFeatureCards();
+    initializePricingToggle();
+    initializeContactForm();
+});
+
+// Handle loading and page transitions
+window.addEventListener('load', () => {
+    document.body.classList.add('loaded');
+    document.querySelector('.loading-screen')?.classList.add('fade-out');
+});
